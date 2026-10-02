@@ -10,11 +10,8 @@
   --gut: 1rem; --r: 6px;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg:#171512; --s1:#201D19; --s2:#2A2621; --line:#413B33; --edge:#7A7165;
-    --text:#F3EFE7; --mut:#B9B0A2; --acc-ink:#C8F53C; --focus:#C8F53C;
-    --ok:#8FDDA6; --warn:#F5C25B; --bad:#FF8C7C; --info:#9CC0FF; color-scheme: dark; }
-}
+/* Light is the default regardless of the operating system, matching the other
+   nine apps. Dark is opt-in through the theme button, which sets data-theme. */
 :root[data-theme="light"] { --bg:#F4F0E6; --s1:#FFFCF5; --s2:#EAE4D5; --line:#CFC6B2; --edge:#857B68; --text:#1C1915; --mut:#5A5347;
   --acc-ink:#364D00; --focus:#1C1915; --ok:#1D6A38; --warn:#7D5300; --bad:#A12E1C; --info:#2848A0; color-scheme: light; }
 :root[data-theme="dark"] { --bg:#171512; --s1:#201D19; --s2:#2A2621; --line:#413B33; --edge:#7A7165;

@@ -61,21 +61,3 @@ services:
       - key: ANTHROPIC_API_KEY
         sync: false
 
-  # Workflows have no scheduler of their own, so a cron job starts the nightly task.
-  - type: cron
-    name: tailrace-nightly
-    runtime: python
-    region: oregon
-    plan: starter
-    schedule: "0 3 * * *"
-    buildCommand: pip install -r requirements.txt
-    startCommand: python trigger_nightly.py
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.13.5
-      - key: DATABASE_URL
-        fromDatabase: { name: tailrace-db, property: connectionString }
-      - key: WORKFLOW_SLUG
-        value: tailrace-flow
-      - key: RENDER_API_KEY
-        sync: false

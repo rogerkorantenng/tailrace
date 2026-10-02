@@ -126,7 +126,7 @@ function renderInvoices(s) {
         <form class="inline-form pay-form" data-id="${esc(i.id)}" novalidate><label class="field-label" for="p-${esc(i.id)}" style="margin:0">Amount</label>
         <input type="text" inputmode="decimal" id="p-${esc(i.id)}" name="amount" placeholder="50.00" autocomplete="off"><button class="btn" type="submit">Record payment</button></form><p class="form-err" role="alert"></p></details></li>`;
   }).join('');
-  paint('invoices', rows || '<li class="empty">No invoices yet. Load the samples to create five in the PayPal sandbox.</li>', $('#invoices'));
+  paint('invoices', rows || '<li class="empty">No invoices yet. Load the samples to create five.</li>', $('#invoices'));
 }
 
 // ---- webhooks

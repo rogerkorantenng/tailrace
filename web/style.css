@@ -1,21 +1,25 @@
 /* Tailrace. Warm charcoal, one electric accent. Sizes are in rem so 200% text still fits. */
 :root {
-  --bg: #171512; --s1: #201D19; --s2: #2A2621; --line: #413B33; --edge: #7A7165;
-  --text: #F3EFE7; --mut: #B9B0A2;
-  --acc: #C8F53C; --on-acc: #171512; --acc-ink: #C8F53C; --focus: #C8F53C;
-  --ok: #8FDDA6; --warn: #F5C25B; --bad: #FF8C7C; --info: #9CC0FF;
+  --bg: #F4F0E6; --s1: #FFFCF5; --s2: #EAE4D5; --line: #CFC6B2; --edge: #857B68;
+  --text: #1C1915; --mut: #5A5347;
+  --acc: #C8F53C; --on-acc: #171512; --acc-ink: #364D00; --focus: #1C1915;
+  --ok: #1D6A38; --warn: #7D5300; --bad: #A12E1C; --info: #2848A0;
   --t-base: 1.094rem; --t-sm: 0.92rem; --t-xs: 0.84rem;
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
   --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --gut: 1rem; --r: 6px;
-  color-scheme: dark;
+  color-scheme: light;
 }
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) { --bg:#F4F0E6; --s1:#FFFCF5; --s2:#EAE4D5; --line:#CFC6B2; --edge:#857B68; --text:#1C1915; --mut:#5A5347;
-    --acc-ink:#364D00; --focus:#1C1915; --ok:#1D6A38; --warn:#7D5300; --bad:#A12E1C; --info:#2848A0; color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg:#171512; --s1:#201D19; --s2:#2A2621; --line:#413B33; --edge:#7A7165;
+    --text:#F3EFE7; --mut:#B9B0A2; --acc-ink:#C8F53C; --focus:#C8F53C;
+    --ok:#8FDDA6; --warn:#F5C25B; --bad:#FF8C7C; --info:#9CC0FF; color-scheme: dark; }
 }
 :root[data-theme="light"] { --bg:#F4F0E6; --s1:#FFFCF5; --s2:#EAE4D5; --line:#CFC6B2; --edge:#857B68; --text:#1C1915; --mut:#5A5347;
   --acc-ink:#364D00; --focus:#1C1915; --ok:#1D6A38; --warn:#7D5300; --bad:#A12E1C; --info:#2848A0; color-scheme: light; }
+:root[data-theme="dark"] { --bg:#171512; --s1:#201D19; --s2:#2A2621; --line:#413B33; --edge:#7A7165;
+  --text:#F3EFE7; --mut:#B9B0A2; --acc-ink:#C8F53C; --focus:#C8F53C;
+  --ok:#8FDDA6; --warn:#F5C25B; --bad:#FF8C7C; --info:#9CC0FF; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }

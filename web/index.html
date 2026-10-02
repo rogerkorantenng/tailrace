@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tailrace</title>
-<meta name="description" content="Payout reconciliation and dunning on Render Workflows, with a PayPal sandbox behind it.">
+<meta name="description" content="Payout reconciliation and dunning on Render Workflows.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231B1916'/%3E%3Cpath d='M5 10h14M5 16h22M5 22h14' stroke='%23F2EEE6' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='10' r='3' fill='%23C8F53C'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/assets/style.css">
 <script>try{var t=localStorage.getItem('tailrace-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
@@ -33,7 +33,7 @@
     <span class="brand-name">Tailrace</span>
   </div>
   <ul class="chips" aria-label="Environment">
-    <li id="chip-paypal"><span class="k">Money</span> PayPal sandbox</li>
+    
     <li id="chip-exec"><span class="k">Runs on</span> <span id="exec-val">...</span></li>
     <li id="chip-agent"><span class="k">Agent</span> <span id="agent-val">...</span></li>
   </ul>
@@ -113,7 +113,7 @@
 </main>
 
 <footer class="foot">
-  <p>Tailrace runs against the PayPal sandbox. No real money moves. Workflow steps run as Render Workflows tasks; every step, retry and agent turn shown here is read back from Postgres.</p>
+  <p>Every step, retry and agent turn shown here is read back from Postgres.</p>
 </footer>
 <script src="/assets/app.js" type="module"></script>
 </body>

@@ -6,6 +6,3 @@ __pycache__/
 node_modules/
 *.pyc
 .pytest_cache/
-
-# QA screenshots from the build rounds — not part of the project
-shots/

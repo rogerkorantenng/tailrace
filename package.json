@@ -1,0 +1,1 @@
+{"name":"tailrace-tools","private":true,"type":"module","description":"Screenshot and UI test helpers only. The app itself is Python.","license":"MIT","dependencies":{"playwright-core":"^1.63.0"}}

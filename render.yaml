@@ -1,0 +1,81 @@
+# One-click deploy: Render Dashboard > New > Blueprint > pick this repo.
+# Render asks for every value marked sync: false. Nothing secret is committed.
+databases:
+  - name: tailrace-db
+    databaseName: tailrace
+    plan: free
+    region: oregon
+
+services:
+  # The UI, the JSON API and the PayPal webhook listener.
+  - type: web
+    name: tailrace-web
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn tailrace.api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: DATABASE_URL
+        fromDatabase: { name: tailrace-db, property: connectionString }
+      - key: WORKFLOW_SLUG
+        value: tailrace-flow
+      - key: RENDER_API_KEY        # lets the web service start workflow runs
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SECRET
+        sync: false
+      - key: PAYPAL_API
+        value: https://api-m.sandbox.paypal.com
+      - key: PAYPAL_WEBHOOK_ID     # printed by scripts/register_webhook.py once the URL exists
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+      - key: ANTHROPIC_API_KEY     # the agent; leave empty to use the scripted fallback
+        sync: false
+
+  # The durable pipeline: every task here runs on its own instance, chained with ctx.run().
+  - type: workflow
+    name: tailrace-flow
+    runtime: python
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python workflow_main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: DATABASE_URL
+        fromDatabase: { name: tailrace-db, property: connectionString }
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SECRET
+        sync: false
+      - key: PAYPAL_API
+        value: https://api-m.sandbox.paypal.com
+      - key: SENDER_EMAIL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+  # Workflows have no scheduler of their own, so a cron job starts the nightly task.
+  - type: cron
+    name: tailrace-nightly
+    runtime: python
+    region: oregon
+    plan: starter
+    schedule: "0 3 * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python trigger_nightly.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: DATABASE_URL
+        fromDatabase: { name: tailrace-db, property: connectionString }
+      - key: WORKFLOW_SLUG
+        value: tailrace-flow
+      - key: RENDER_API_KEY
+        sync: false

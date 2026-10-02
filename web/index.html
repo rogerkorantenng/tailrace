@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tailrace</title>
+<meta name="description" content="Payout reconciliation and dunning on Render Workflows, with a PayPal sandbox behind it.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231B1916'/%3E%3Cpath d='M5 10h14M5 16h22M5 22h14' stroke='%23F2EEE6' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='10' r='3' fill='%23C8F53C'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/style.css">
+<script>try{var t=localStorage.getItem('tailrace-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-run" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="20 15" stroke-linecap="round"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.6-3.7M13 2.5v3h-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-dot" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 5v3.4l2.2 1.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 16 16"><path d="M4 14V2.5M4 3h8l-1.8 3L12 9H4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-return" viewBox="0 0 16 16"><path d="M6 4L3 7l3 3M3 7h6.5a3.5 3.5 0 0 1 0 7H8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 16 16"><path d="M6 3.5v9M10 3.5v9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 1.5v1.6M8 12.9v1.6M1.5 8h1.6M12.9 8h1.6M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+<a class="skip" href="#main">Skip to the pipeline</a>
+
+<header class="top">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 10h14M5 16h22M5 22h14" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="25" cy="10" r="3" class="mark-dot"/></svg>
+    <span class="brand-name">Tailrace</span>
+  </div>
+  <ul class="chips" aria-label="Environment">
+    <li id="chip-paypal"><span class="k">Money</span> PayPal sandbox</li>
+    <li id="chip-exec"><span class="k">Runs on</span> <span id="exec-val">...</span></li>
+    <li id="chip-agent"><span class="k">Agent</span> <span id="agent-val">...</span></li>
+  </ul>
+  <button class="btn quiet icon-btn" id="theme" type="button" aria-label="Switch between light and dark"><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg><span class="theme-word">Theme</span></button>
+</header>
+
+<main id="main">
+  <noscript><p class="panel pad">Tailrace draws its pipeline in the browser. Turn on JavaScript to use it.</p></noscript>
+
+  <section class="hero" aria-labelledby="headline">
+    <div class="hero-text">
+      <h1 id="headline">Loading the ledger</h1>
+      <p class="lede" id="lede"></p>
+    </div>
+    <div class="controls" role="group" aria-label="Run the pipeline">
+      <div class="ctl-row">
+        <button class="btn" id="b-seed" type="button">Load 6 sample payouts</button>
+        <button class="btn" id="b-inv" type="button">Load 5 sample invoices</button>
+      </div>
+      <div class="ctl-row">
+        <button class="btn primary" id="b-settle" type="button">Send queued payouts</button>
+        <button class="btn primary" id="b-dun" type="button">Chase overdue invoices</button>
+      </div>
+      <label class="check"><input type="checkbox" id="crash"> <span>Crash the first payout step right after PayPal accepts it. The retry must not pay twice.</span></label>
+      <div class="ctl-row small">
+        <button class="btn quiet" id="b-night" type="button">Run the nightly sweep</button>
+        <button class="btn quiet" id="b-reset" type="button">Clear everything</button>
+      </div>
+      <p id="notice" class="notice" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <div class="grid">
+    <div class="col main-col">
+      <section class="panel" aria-labelledby="h-pipe">
+        <header class="panel-h">
+          <h2 id="h-pipe">Pipeline</h2>
+          <div id="run-picker" class="runs" role="group" aria-label="Choose a run"></div>
+        </header>
+        <div id="run-meta" class="run-meta"></div>
+        <div id="steps" class="steps"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-agent">
+        <header class="panel-h"><h2 id="h-agent">What the agent did</h2><div id="agent-tabs" class="tabs" role="tablist" aria-label="Payout items the agent looked at"></div></header>
+        <div id="agent-body" class="agent-body"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-rec">
+        <header class="panel-h"><h2 id="h-rec">PayPal against the ledger</h2></header>
+        <div id="rec-body"></div>
+      </section>
+    </div>
+
+    <div class="col side-col">
+      <section class="panel" aria-labelledby="h-pay">
+        <header class="panel-h"><h2 id="h-pay">Payouts</h2><p class="sub" id="ledger-line"></p></header>
+        <ul id="payouts" class="rows"></ul>
+      </section>
+
+      <section class="panel" id="needs-panel" aria-labelledby="h-needs">
+        <header class="panel-h"><h2 id="h-needs">Needs a person</h2></header>
+        <div id="needs"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-inv">
+        <header class="panel-h"><h2 id="h-inv">Invoices</h2></header>
+        <ul id="invoices" class="rows"></ul>
+      </section>
+
+      <section class="panel" aria-labelledby="h-wh">
+        <header class="panel-h"><h2 id="h-wh">PayPal webhooks</h2></header>
+        <div id="webhooks"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <p>Tailrace runs against the PayPal sandbox. No real money moves. Workflow steps run as Render Workflows tasks; every step, retry and agent turn shown here is read back from Postgres.</p>
+</footer>
+<script src="/assets/app.js" type="module"></script>
+</body>
+</html>

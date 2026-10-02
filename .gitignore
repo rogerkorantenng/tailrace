@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+.env
+.env.*
+!.env.example
+node_modules/
+*.pyc
+.pytest_cache/
+
+# QA screenshots from the build rounds — not part of the project
+shots/

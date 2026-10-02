@@ -119,3 +119,18 @@ Other measures, all checked by `scripts/ui_test.mjs`: body text is 17.5px (13pt)
 - GBP and USD both settled in testing. PayPal may change sandbox balances.
 
 MIT licensed. See `LICENSE`.
+
+## What the panels show
+
+**The agent.** When a payout item fails, the agent reads the failure, looks up the
+payee and the PayPal error code, and proposes a fix. Its tool calls and the rules
+gate that approves or rejects each proposal are recorded against the run. A run with
+no failures shows nothing, which is the point: it only speaks when something broke.
+
+**Reconciliation.** When a run finishes, every payout and invoice is read back from
+PayPal and compared with the ledger. Differences are either corrected in the ledger
+or handed to a person, never silently dropped.
+
+**Webhooks.** PayPal sends several event types for one batch, each carrying the same
+re-read line. The panel groups them by that line so a batch reads as one row with its
+event types beside it, rather than six near-identical cards.

@@ -131,22 +131,39 @@ function renderInvoices(s) {
 
 // ---- webhooks
 function renderWebhooks(s) {
-  const head = `<p class="sub" style="padding:.8rem 1rem">${s.env.webhook_verifying ? 'Signature checking is on. A body that was changed in transit is refused with 401.' : 'No webhook id is configured, so every delivery is refused until PAYPAL_WEBHOOK_ID is set.'}</p>`;
-  const rows = s.webhooks.map((w) => `<div class="wh"><span class="mono">${esc(w.event_type)}</span><span>${w.verified ? tag(['Signature valid', 'check', 'ok']) : tag(['Rejected', 'cross', 'bad'])} <span class="row-sub">${ago(w.received_at)}</span></span><span class="row-sub">${esc(w.effect || 'Processing')}</span></div>`).join('');
+  const head = `<p class="sub" style="padding:.8rem 1rem">${s.env.webhook_verifying ? 'Signature checking is on. A body that was changed in transit is refused with 401.' : 'Signature checking is off until a webhook id is set.'}</p>`;
+  // PayPal sends several event types per batch and each carries the same re-read
+  // line. Group by that line so it is said once, with the event types beside it.
+  const groups = new Map();
+  for (const w of s.webhooks) {
+    const key = (w.detail || '') + '|' + (w.verified ? 'v' : 'x');
+    if (!groups.has(key)) groups.set(key, { detail: w.detail, verified: w.verified, at: w.received_at, types: [] });
+    const g = groups.get(key);
+    if (!g.types.includes(w.event_type)) g.types.push(w.event_type);
+  }
+  const rows = [...groups.values()].map((g) => `<div class="wh">${g.types.map((x) => `<span class="mono">${esc(x)}</span>`).join(' ')}<span>${g.verified ? tag(['Signature valid', 'check', 'ok']) : tag(['Rejected', 'cross', 'bad'])} <span class="row-sub">${ago(g.at)}</span></span>${g.detail ? `<span class="row-sub">${esc(g.detail)}</span>` : ''}</div>`).join('');
   paint('webhooks', head + (rows || '<p class="empty" style="padding-top:0">No events yet. Signed events from PayPal will appear here.</p>'), $('#webhooks'));
 }
 
 // ---- runs
 function renderRunPicker(s) {
-  const html = s.runs.length ? s.runs.map((r) => {
+  // One webhook delivery is one run, so a busy minute produces a dozen identical
+  // pills. They are counted instead; the runs worth picking are the ones a person started.
+  const hooks = s.runs.filter((r) => r.kind === 'webhook');
+  const picks = s.runs.filter((r) => r.kind !== 'webhook');
+  const pill = (r) => {
     const st = r.status === 'running' ? 'Running' : r.status === 'done' ? 'Done' : r.status === 'failed' ? 'Failed' : 'Needs attention';
-    return `<button class="run-pill" type="button" data-run="${esc(r.id)}" aria-pressed="${r.id === state.runId}">${esc(KIND[r.kind] || r.kind)} <span class="mono">${esc(r.id)}</span> <span>${st}</span></button>`;
-  }).join('') : '<span class="sub">No runs yet.</span>';
+    return `<button class="run-pill" type="button" data-run="${esc(r.id)}" aria-pressed="${r.id === state.runId}">${esc(KIND[r.kind] || r.kind)} <span class="mono">${esc(r.id)}</span> <span class="row-sub">${st}</span></button>`;
+  };
+  const counted = hooks.length ? `<span class="sub">${hooks.length} webhook${hooks.length === 1 ? '' : 's'} ingested</span>` : '';
+  const html = picks.length || hooks.length
+    ? picks.map(pill).join('') + counted
+    : '<span class="sub">No runs yet.</span>';
   paint('runs', html, $('#run-picker'));
 }
 function renderRun(d) {
   const meta = $('#run-meta'); const el = $('#steps');
-  if (!d) { paint('meta', '', meta); paint('steps', '<p class="empty">Send the queued payouts or chase the invoices and the steps will appear here as Render runs them.</p>', el); return; }
+  if (!d) { paint('meta', '', meta); paint('steps', '<p class="empty">Send the queued payouts to see the steps.</p>', el); return; }
   const r = d.run; const ex = r.render_run_id ? `<span>Render run <b class="mono">${esc(r.render_run_id)}</b></span>` : '';
   const dur = r.finished_at ? `${((new Date(r.finished_at) - new Date(r.started_at)) / 1000).toFixed(0)}s` : 'in progress';
   const retried = d.steps.reduce((n, s) => n + s.retries, 0);
@@ -174,7 +191,7 @@ function renderRun(d) {
 function renderAgent(d) {
   const tabs = $('#agent-tabs'); const body = $('#agent-body');
   const ids = d ? [...new Set(d.agent_turns.map((t) => t.obligation_id))] : [];
-  if (!ids.length) { paint('atabs', '', tabs); paint('agent', '<p class="empty">When an item fails, the agent reads it, looks up the payee and the error, and proposes a fix. Its tool calls and the rules gate appear here.</p>', body); return; }
+  if (!ids.length) { paint('atabs', '', tabs); paint('agent', '<p class="empty">Nothing failed in this run.</p>', body); return; }
   if (!ids.includes(state.agentTab)) state.agentTab = ids[0];
   paint('atabs', ids.map((id) => `<button class="tab" role="tab" type="button" data-ob="${esc(id)}" aria-selected="${id === state.agentTab}">${esc(id)}</button>`).join(''), tabs);
   const turns = d.agent_turns.filter((t) => t.obligation_id === state.agentTab);
@@ -200,7 +217,7 @@ function renderAgent(d) {
 
 function renderRec(d) {
   const el = $('#rec-body');
-  if (!d || !d.reconciliation.length) { paint('rec', '<p class="empty">When a run finishes, each payout and invoice is checked against what PayPal reports. Differences are fixed in the ledger or handed to a person.</p>', el); return; }
+  if (!d || !d.reconciliation.length) { paint('rec', '<p class="empty">Nothing to reconcile yet.</p>', el); return; }
   const V = { match: ['Match', 'check', 'ok'], healed: ['Ledger corrected', 'retry', 'info'], mismatch: ['Needs a person', 'flag', 'bad'] };
   paint('rec', d.reconciliation.map((r) => `<div class="rec"><span class="mono">${esc(r.subject_id.length > 14 ? r.subject_id.slice(0, 14) + '...' : r.subject_id)}</span>
     <div class="rec-pair"><span class="row-sub">Ledger</span><span class="mono">${esc(r.ledger)}</span></div>

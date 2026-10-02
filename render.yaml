@@ -44,7 +44,7 @@ services:
     runtime: python
     region: oregon
     buildCommand: pip install -r requirements.txt
-    startCommand: python workflow_main.py
+    startCommand: render-workflows tailrace.tasks:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.5

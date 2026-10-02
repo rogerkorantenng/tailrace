@@ -43,7 +43,9 @@ function counts(obs) { const c = {}; obs.forEach((o) => { c[o.status] = (c[o.sta
 function renderHero(s) {
   const obs = s.obligations; const c = counts(obs); const n = obs.length;
   let h, l;
-  if (!n) { h = 'Nothing in the ledger yet.'; l = 'Load six sample payouts, then send them. PayPal answers each one differently, and the pipeline has to cope with every answer.'; }
+  // The empty state names the test worth running, not the buttons available.
+  if (!n) { h = 'A payout that crashes mid-flight must not pay twice.';
+    l = 'Load the six payouts, tick the crash box, and send. The step dies after PayPal accepts the batch; the retry has to recognise its own work and settle once.'; }
   else if (c.queued === n) { h = `${n} payouts are queued and none has been sent.`; l = 'Send them as one run. Each currency goes as its own batch, in parallel, and the run waits for PayPal to say where every item ended up.'; }
   else if (c.sending) { h = `${c.sending} of ${n} payouts are still with PayPal.`; l = 'A 201 from PayPal proves nothing. The run keeps polling until each item reaches a final state.'; }
   else {

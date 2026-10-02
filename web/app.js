@@ -45,7 +45,7 @@ function renderHero(s) {
   let h, l;
   // The empty state names the test worth running, not the buttons available.
   if (!n) { h = 'A payout that crashes mid-flight must not pay twice.';
-    l = 'Load the six payouts, tick the crash box, and send. The step dies after PayPal accepts the batch; the retry has to recognise its own work and settle once.'; }
+    l = 'Load the six payouts, then send with a crash. The step dies after PayPal accepts the batch; the retry has to recognise its own work and settle once.'; }
   else if (c.queued === n) { h = `${n} payouts are queued and none has been sent.`; l = 'Send them as one run. Each currency goes as its own batch, in parallel, and the run waits for PayPal to say where every item ended up.'; }
   else if (c.sending) { h = `${c.sending} of ${n} payouts are still with PayPal.`; l = 'A 201 from PayPal proves nothing. The run keeps polling until each item reaches a final state.'; }
   else {
@@ -257,7 +257,7 @@ document.addEventListener('click', (e) => {
   const t = e.target.closest('button'); if (!t) return;
   if (t.id === 'b-seed') act(t, () => api('/api/seed', { method: 'POST' }), (r) => `${r.added} payouts queued.`);
   else if (t.id === 'b-inv') act(t, () => api('/api/invoices/seed', { method: 'POST' }), (r) => `${r.created} invoices created and sent in the PayPal sandbox.`);
-  else if (t.id === 'b-settle') act(t, () => api('/api/runs/settle', { method: 'POST', body: { crash: $('#crash').checked } }), () => 'Run started. Watch the pipeline below.');
+  else if (t.id === 'b-settle' || t.id === 'b-crash') act(t, () => api('/api/runs/settle', { method: 'POST', body: { crash: t.id === 'b-crash' } }), () => 'Run started. Watch the pipeline below.');
   else if (t.id === 'b-dun') act(t, () => api('/api/runs/dunning', { method: 'POST' }), () => 'Dunning sweep started.');
   else if (t.id === 'b-night') act(t, () => api('/api/runs/nightly', { method: 'POST' }), () => 'Nightly sweep started: payouts and dunning in parallel.');
   else if (t.id === 'b-reset') {

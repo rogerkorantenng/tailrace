@@ -55,9 +55,13 @@
       </div>
       <div class="ctl-row">
         <button class="btn primary" id="b-settle" type="button">Send queued payouts</button>
+        <button class="btn primary" id="b-crash" type="button">Send, then crash mid-flight</button>
+      </div>
+      <p class="ctl-note">The crash lands after PayPal has accepted the batch. The retry has to recognise its own work and settle once.</p>
+      <div class="ctl-row">
         <button class="btn primary" id="b-dun" type="button">Chase overdue invoices</button>
       </div>
-      <label class="check"><input type="checkbox" id="crash"> <span>Crash the first payout step right after PayPal accepts it. The retry must not pay twice.</span></label>
+      <input type="checkbox" id="crash" hidden>
       <div class="ctl-row small">
         <button class="btn quiet" id="b-night" type="button">Run the nightly sweep</button>
         <button class="btn quiet" id="b-reset" type="button">Clear everything</button>

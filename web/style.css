@@ -175,3 +175,4 @@ body { overflow-wrap: anywhere; }
 .inline-form input { min-width: 0; flex-basis: 8rem; }
 .rows > li, .card, .agent-body, .decision, .rec, .wh { grid-template-columns: minmax(0, 1fr); } @media (min-width: 48rem) { .rec { grid-template-columns: 8rem 1fr 1fr 9rem; } }
 .run-meta:empty { display: none; }
+.ctl-note { margin: -.2rem 0 .6rem; color: var(--mut); font-size: .86rem; max-width: 56ch; }

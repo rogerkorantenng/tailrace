@@ -2,7 +2,7 @@
 
 PayPal signs  transmission_id | transmission_time | webhook_id | crc32(body)  with the private key behind
 the certificate at PAYPAL-CERT-URL. We rebuild that string and check it against the certificate's public key.
-Webhooks are per app, so events from sibling projects arrive here too: a valid signature on an event that
+Webhooks are per app, so unrelated events arrive here too: a valid signature on an event that
 is not ours is acknowledged with 200 and ignored.
 """
 import base64
